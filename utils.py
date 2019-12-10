@@ -41,3 +41,16 @@ def history_curation(history):
     df = pd.DataFrame(history)
     df.index.name = 'epoch'
     return df
+
+def load_histories_to_df(path='histories'):
+    histories_dict = {}
+
+    history_filenames = os.listdir(path)
+    for filename in history_filenames:
+        histories_dict[filename[:-5]] = load_history(filename[:-5], path)
+        
+    metrics_dict = {k: pd.DataFrame(v) for k,v in histories_dict.items()}
+    metrics_df = pd.concat(metrics_dict, axis=1)
+    metrics_df.index.name = 'epoch'
+    return metrics_df
+    
