@@ -30,14 +30,14 @@ class GoloisSequence(tf.keras.utils.Sequence):
 
     def __getitem__(self, idx):
         # update data at the start of each change_batch epoch
-        if idx == 0 & self.k % self.change_batch == 0:
+        if (idx == 0) & (self.k % self.change_batch == 0):
             print("Load new batch of data...")
             golois.getBatch (self.input_data, self.policy, self.value, self.end)
             print("New batch is loaded")
         
         indices = range(idx * self.batch_size,(idx + 1) *self.batch_size)
         
-        if idx == self.__len__():
+        if idx == self.__len__()-1:
             print("Last step of the current epoch")
             indices = range(idx * self.batch_size, self.N)
             # one epoch finished: update counter
