@@ -37,8 +37,7 @@ class GoloisSequence(tf.keras.utils.Sequence):
         
         indices = range(idx * self.batch_size,(idx + 1) *self.batch_size)
         
-        if idx == self.__len__()-1:
-            print("Last step of the current epoch")
+        if (idx == self.__len__()-1):
             indices = range(idx * self.batch_size, self.N)
             # one epoch finished: update counter
             self.k+= 1
