@@ -42,15 +42,35 @@ def history_curation(history):
     df.index.name = 'epoch'
     return df
 
-def load_histories_to_df(path='histories'):
+def load_json_histories_to_df(path='histories'):
     histories_dict = {}
 
     history_filenames = os.listdir(path)
-    for filename in history_filenames:
+    
+    history_filenames_json = [filename for filename in history_filenames if filename.endswith('.json')]
+    for filename in history_filenames_json:
         histories_dict[filename[:-5]] = load_history(filename[:-5], path)
         
     metrics_dict = {k: pd.DataFrame(v) for k,v in histories_dict.items()}
     metrics_df = pd.concat(metrics_dict, axis=1)
     metrics_df.index.name = 'epoch'
     return metrics_df
+    
+def load_log_histories(path='histories'):
+    histories_dict = {}
+    history_filenames = os.listdir(path)
+    
+    history_filenames_log = [filename for filename in history_filenames if filename.endswith('.log')]
+    for filename in history_filenames_log:
+        df = pd.read_csv(os.path.join(path, filename), index_col=0)
+        df = df.reset_index()
+        #df.columns = pd.MultiIndex.from_product([[filename[:-4]], df.columns])
+        
+        histories_dict[filename[:-4]] = df
+        
+    metrics_df = pd.concat(histories_dict, axis=1)
+    return metrics_df
+    
+    
+    
     
