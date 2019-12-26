@@ -8,6 +8,7 @@ Created on Wed Dec  4 18:34:48 2019
 import tensorflow.keras as keras
 from tensorflow.keras import layers 
 from tensorflow.keras import regularizers
+from constraints import Symmetry
 
 PLANES = 8
 MOVES = 361
@@ -669,4 +670,121 @@ def get_model_week3_seven(convol_size=128):
     value_head = layers.Dense(1, activation='sigmoid', name='value')(value_head)
     
     model = keras.Model(inputs=input, outputs=[policy_head, value_head])
+    return model
+
+def get_corentin_model():
+    input = keras.Input(shape=(19, 19, PLANES), name='board')
+
+    x = layers.Conv2D(38, 3, padding='same')(input)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    
+    x = layers.Conv2D(64, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    
+    x = layers.Conv2D(128, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.2)(x)
+    
+    ident = x
+    x = layers.Conv2D(128, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(128, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.4)(x)
+    x = layers.add([ident,x])
+    ident2 = x
+    x = layers.Conv2D(128, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(128, 3, padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.4)(x)
+    x = layers.add([ident2,x])
+    
+    policy_head = layers.Conv2D(2, 1, padding='same')(x)
+    policy_head = layers.BatchNormalization()(policy_head)
+    policy_head = layers.Activation('relu')(policy_head)
+    policy_head = layers.Flatten()(policy_head)
+    policy_head = layers.Dense(MOVES, activation='softmax', name='policy')(policy_head)
+    
+    value_head = layers.Conv2D(32, 3, padding='same')(x)
+    value_head = layers.Activation('relu')(value_head)
+    value_head = layers.Conv2D(1, 1, padding='same')(value_head)
+    value_head = layers.Activation('relu')(value_head)
+    value_head = layers.ZeroPadding2D(padding=(1, 1))(value_head)
+    value_head = layers.AveragePooling2D(strides=2)(value_head)
+    value_head = layers.ZeroPadding2D(padding=(1, 1))(value_head)
+    value_head = layers.AveragePooling2D(strides=2)(value_head)
+    value_head = layers.Conv2D(1, 1, padding='same')(value_head)
+    value_head = layers.Flatten()(value_head)
+    value_head = layers.Dense(256, activation='relu')(value_head)
+    value_head = layers.Dense(1, activation='tanh', name='value')(value_head)
+    
+    model = keras.Model(inputs=input, outputs=[policy_head, value_head])
+    
+    return model
+
+
+def get_corentin_model_with_constraint(kind='all'):
+    input = keras.Input(shape=(19, 19, PLANES), name='board')
+
+    x = layers.Conv2D(38, 3, padding='same', kernel_constraint=Symmetry(kind))(input)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    
+    x = layers.Conv2D(64, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    
+    x = layers.Conv2D(128, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.2)(x)
+    
+    ident = x
+    x = layers.Conv2D(128, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(128, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.4)(x)
+    x = layers.add([ident,x])
+    ident2 = x
+    x = layers.Conv2D(128, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(128, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.4)(x)
+    x = layers.add([ident2,x])
+    
+    policy_head = layers.Conv2D(2, 1, padding='same', kernel_constraint=Symmetry(kind))(x)
+    policy_head = layers.BatchNormalization()(policy_head)
+    policy_head = layers.Activation('relu')(policy_head)
+    policy_head = layers.Flatten()(policy_head)
+    policy_head = layers.Dense(MOVES, activation='softmax', name='policy')(policy_head)
+    
+    value_head = layers.Conv2D(32, 3, padding='same', kernel_constraint=Symmetry(kind))(x)
+    value_head = layers.Activation('relu')(value_head)
+    value_head = layers.Conv2D(1, 1, padding='same', kernel_constraint=Symmetry(kind))(value_head)
+    value_head = layers.Activation('relu')(value_head)
+    value_head = layers.ZeroPadding2D(padding=(1, 1))(value_head)
+    value_head = layers.AveragePooling2D(strides=2)(value_head)
+    value_head = layers.ZeroPadding2D(padding=(1, 1))(value_head)
+    value_head = layers.AveragePooling2D(strides=2)(value_head)
+    value_head = layers.Conv2D(1, 1, padding='same', kernel_constraint=Symmetry(kind))(value_head)
+    value_head = layers.Flatten()(value_head)
+    value_head = layers.Dense(256, activation='relu')(value_head)
+    value_head = layers.Dense(1, activation='tanh', name='value')(value_head)
+    
+    model = keras.Model(inputs=input, outputs=[policy_head, value_head])
+    
     return model
