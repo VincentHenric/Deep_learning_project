@@ -32,10 +32,11 @@ class GoloisSequence(tf.keras.utils.Sequence):
 
     def __getitem__(self, idx):
         # update data at the start of each change_batch epoch
-        if (idx == 0) & next(self.change_batch):
-            print("Load new batch of data...")
-            golois.getBatch (self.input_data, self.policy, self.value, self.end)
-            print("New batch is loaded")
+        if (idx == 0):
+            if next(self.change_batch):
+                print("Load new batch of data...")
+                golois.getBatch (self.input_data, self.policy, self.value, self.end)
+                print("New batch is loaded")
         
         indices = range(idx * self.batch_size,(idx + 1) *self.batch_size)
         
@@ -60,6 +61,12 @@ def constant_generator(n):
         k+=1
         
 def complex_generator(indices, frequency):
+    """
+    example
+    indices=[0,10]
+    frequency=[5,2]
+    for the first 10 epochs, call getbatch every 5 epochs; after, every 2 epochs
+    """
     k = 0
     current_freq = frequency[0]
     i = 0
