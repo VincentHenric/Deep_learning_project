@@ -13,9 +13,11 @@ import numpy as np
 import golois
 
 class GoloisSequence(tf.keras.utils.Sequence):
-    def __init__(self, N=100000, batch_size=128, change_batch=5, planes=8, moves=361):
+    def __init__(self, N=100000, batch_size=128, planes=8, moves=361, change_batch=5):
       self.batch_size = batch_size
       self.N = N
+      if isinstance(change_batch, int):
+          change_batch = constant_generator(change_batch)
       self.change_batch = change_batch
       self.k = 0
       
@@ -30,7 +32,7 @@ class GoloisSequence(tf.keras.utils.Sequence):
 
     def __getitem__(self, idx):
         # update data at the start of each change_batch epoch
-        if (idx == 0) & (self.k % self.change_batch == 0):
+        if (idx == 0) & next(self.change_batch):
             print("Load new batch of data...")
             golois.getBatch (self.input_data, self.policy, self.value, self.end)
             print("New batch is loaded")
@@ -46,3 +48,37 @@ class GoloisSequence(tf.keras.utils.Sequence):
                 {'policy': self.policy[indices],
                  'value': self.value[indices]}
                 )
+
+
+def constant_generator(n):
+    k = 0
+    while True:
+        if k % n == 0:
+            yield True
+        else:
+            yield False
+        k+=1
+        
+def complex_generator(indices, frequency):
+    k = 0
+    current_freq = frequency[0]
+    i = 0
+    while True:
+        if i+1!=len(indices):
+            if k>=indices[i+1]:
+                i+=1
+                current_freq = frequency[i]
+        if k % current_freq == 0:
+            yield True
+        else:
+            yield False
+        k+=1
+            
+            
+            
+            
+            
+            
+            
+            
+            
