@@ -16,7 +16,7 @@ notebook files:
 - Vincent_learning: notebook to learn a model
 
 To use Vincent_learning notebook:
-- give a name to the filename for export (or use the name of the model you want to load) by assigning the variable "name"
+- give a name to the filename for export (or use the name of the model you want to load) by assigning the variable "model_name"
 - if you use a model with custom symmetry constraint, you should load it with the function keras.models.load_model(model_name, curstom_objects). Make sure you use this line and comment the other one
 - to export a model with custom symmetry constraint such that it can play the tournament (problem of serialization due to custom object), you can:
   - first, save it normally
